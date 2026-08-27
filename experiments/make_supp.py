@@ -96,8 +96,9 @@ parts.append(r"""
 \begin{table*}[h]
 \caption{\label{tab:s3}Balanced classification accuracy (\%, mean $\pm$
 1~s.d.\ over five noise seeds; boundary band excluded) versus acquisition
-time on the NV prior. The Monte-Carlo Bayes row is the approximate
-information limit of the twin (single seed).}
+time on the NV prior. The Monte-Carlo Bayes row is the
+Bayes-optimal reference under the assumed simulation prior (single
+seed; convergence with reference-sample size in Table~\ref{tab:bconv}).}
 \small
 \begin{ruledtabular}
 \begin{tabular}{l""" + "c" * len(T) + r"""}
@@ -209,8 +210,10 @@ try:
                     f"{'held out' if s['held_out'] else 'train'} \\\\")
     parts.append(r"""
 \begin{table}[h]
-\caption{\label{tab:s7}The nine experimental quantum-dot HBT series
-(sps-quality, FI-SEQUR demonstrator). $g^{(2)}(0)$ references from the
+\caption{\label{tab:s7}The eight experimental quantum-dot HBT
+measurement series (sps-quality, FI-SEQUR demonstrator), analyzed as
+nine records: the 2.5-$\mu$W series was recorded in two sessions
+(day~1/day~2), kept separate here. $g^{(2)}(0)$ references from the
 peak-area analysis of each full accumulation.}
 \small
 \begin{ruledtabular}
@@ -230,7 +233,7 @@ Series & $g^{(2)}(0)$ ref. & $T$ (s) & 30-s windows & Split \\
         tr = d.get("mae_train_series")
         rows.append(f"{lbl[m]} & {d['mae_held_out']:.3f} & "
                     f"{tr:.3f} \\\\" if tr is not None else
-                    f"{lbl[m]} & {d['mae_held_out']:.3f} & --- \\\\")
+                    f"{lbl[m]} & {d['mae_held_out']:.3f} & n/a \\\\")
     parts.append(r"""
 \begin{table}[h]
 \caption{\label{tab:s8}Early (30-s) $g^{(2)}(0)$ estimation MAE on real
@@ -291,8 +294,8 @@ try:
     plats = ["NV", "hBN", "GaN", "SiV"]
     Ts = [0.3, 3.0]
     rows = []
-    lbl = {"uncond_syn": "Uncond.\ (synth.)",
-           "graph_syn": "Graph-cond.\ (synth.)",
+    lbl = {"uncond_syn": "Uncond.\\ (synth.)",
+           "graph_syn": "Graph-cond.\\ (synth.)",
            "oracle_real": "Oracle (real four)"}
     for m in ("uncond_syn", "graph_syn", "oracle_real"):
         cells = []
@@ -321,7 +324,88 @@ Model & """ + head + r""" \\
 except FileNotFoundError:
     pass
 
+parts.append(r'''
+
+% ---- S11: capability comparison (cite-free copy of main-text sota table)
+\providecommand{\scA}[1]{\parbox[t]{0.185\textwidth}{\raggedright #1\strut}}
+\providecommand{\scB}[1]{\parbox[t]{0.105\textwidth}{\raggedright #1\strut}}
+\providecommand{\scC}[1]{\parbox[t]{0.115\textwidth}{\raggedright #1\strut}}
+\providecommand{\scD}[1]{\parbox[t]{0.100\textwidth}{\raggedright #1\strut}}
+\providecommand{\scE}[1]{\parbox[t]{0.115\textwidth}{\raggedright #1\strut}}
+\providecommand{\scF}[1]{\parbox[t]{0.255\textwidth}{\raggedright #1\strut}}
+\newcommand{\tablesotasupp}{%
+\begin{tabular}{llllll}
+\hline\hline
+\scA{Figure of merit} & \scB{Conventional pipeline} & \scC{Kudyshev '20} &
+ \scD{Kudyshev '23} & \scE{Kedziora '23/'25} &
+ \scF{\textbf{SPARQ (this work)}} \\[1.5pt]
+\hline
+\scA{Matched-accuracy screening speedup} & \scB{$1\times$ (ref.)} &
+ \scC{${\sim}10^{2}\times$ vs.\ free fit} &
+ \scD{${\sim}12\times$ vs.\ fit ($g^{(2)}$ maps)} & \scE{n/r} &
+ \scF{$\speedupSnn\times$ vs.\ strong multi-start fit} \\[1.5pt]
+\scA{Benchmark ceiling used} & \scB{asymptotic fit} &
+ \scC{fit baseline} & \scD{fit baseline} & \scE{fit + UQ} &
+ \scF{Monte-Carlo Bayes reference under the prior (tracked)} \\[1.5pt]
+\scA{Median decision latency} & \scB{minutes} & \scC{${\sim}1$\,s} &
+ \scD{${\sim}10$\,s} & \scE{$\geq 10$\,s} &
+ \scF{\anyMedianHalf\,ms, anytime-gateable} \\[1.5pt]
+\scA{Inference energy per decision} & \scB{n/r} & \scC{n/r (GPU)} &
+ \scD{n/r (GPU)} & \scE{n/r} &
+ \scF{\eSnnPointOneT\,nJ--\eSnnOneTuJ\,$\mu$J, event-proportional}
+ \\[1.5pt]
+\scA{Acquisition control} & \scB{open loop} & \scC{open loop} &
+ \scD{open loop} & \scE{open loop} &
+ \scF{closed loop: $\rlSpeedup\times$ vs.\ raster; oracle bound
+ $\xOracleRaster\times$} \\[1.5pt]
+\scA{Measurement-protocol design} & \scB{manual} & \scC{manual} &
+ \scD{manual} & \scE{manual} &
+ \scF{adjoint: $\tau_{\max}$ $60.5{\to}\wStar$\,ns,
+ $+\adjGainSparse$\,pts} \\[1.5pt]
+\scA{Early $g^{(2)}(0)$ MAE, 30-s real windows} &
+ \scB{\ganMaeFit{} (peak area)} & \scC{n/r} & \scD{n/r} &
+ \scE{own data, with UQ} &
+ \scF{\ganMaeSim{} zero-shot (floor \floorMae)} \\[1.5pt]
+\scA{Sim-to-real audit} & \scB{n/a} & \scC{none} & \scD{none} &
+ \scE{bootstrap UQ} &
+ \scF{floor decomposition + GAN critic (\pctRemovable\% of removable
+ error closed)} \\[1.5pt]
+\scA{Cross-platform transfer} & \scB{n/a} & \scC{none} & \scD{none} &
+ \scE{fine-tuning, limited benefit} &
+ \scF{zero-shot physics graphs: \gGapRecovery\% of oracle gap}
+ \\[1.5pt]
+\scA{Open release} & \scB{n/a} & \scC{none} & \scD{on request} &
+ \scE{data + code} &
+ \scF{code (GitHub) + benchmark data + trained models (Zenodo)} \\
+\hline\hline
+\end{tabular}}
+''')
+
+out = "\n".join(parts)
+import re as _re
+# add explicit outer rules inside each ruledtabular (ACS article route:
+# ruledtabular is a plain centering shim, so the rules must be in the
+# tabular itself)
+out = _re.sub(r"\\begin\{ruledtabular\}\s*\n(\\begin\{tabular\}\{[^}]*\})",
+              lambda m: "\\begin{ruledtabular}\n" + m.group(1) + "\n\\hline\\hline", out)
+out = _re.sub(r"\\end\{tabular\}\s*\n\\end\{ruledtabular\}",
+              lambda m: "\\hline\\hline\n\\end{tabular}\n\\end{ruledtabular}", out)
 with open(f"{P}/supp_tables.tex", "w") as f:
     f.write("% AUTO-GENERATED by experiments/make_supp.py\n")
-    f.write("\n".join(parts))
+    f.write(out)
 print("wrote supp_tables.tex with", len(parts), "tables")
+
+# Also split into one file per labeled table so supplementary.tex can
+# input each table next to the text that cites it (ACS: tables numbered
+# S1...Sn in order of appearance).
+blocks = _re.split(r"(?=\\begin\{table\*?\})", out)
+import os
+for b in blocks:
+    m = _re.search(r"\\label\{tab:([a-z0-9]+)\}", b)
+    if m and b.strip().startswith("\\begin{table"):
+        with open(f"{P}/supp_tab_{m.group(1)}.tex", "w") as f:
+            f.write("% AUTO-GENERATED by experiments/make_supp.py\n" + b)
+    elif "tablesotasupp" in b:
+        with open(f"{P}/supp_tab_sota.tex", "w") as f:
+            f.write("% AUTO-GENERATED by experiments/make_supp.py\n" + b)
+print("wrote per-table files")
