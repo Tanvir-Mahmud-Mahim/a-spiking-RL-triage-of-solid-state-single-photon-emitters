@@ -27,7 +27,7 @@ for name, d in e1["mc_vs_exact"].items():
                 f"{d['chi2_red']:.3f} & {100*d['nrmse']:.1f}\\% & "
                 f"{100*d['mad']:.1f}\\% \\\\")
 parts.append(r"""
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:s1}Stream-twin validation against the numerically
 exact master-equation $g^{(2)}(\tau)$ (no free parameters). Effective
 $(\tau_1, \tau_2, a)$ from the eigen-decomposition of the simulated
@@ -54,7 +54,7 @@ for k, p in PLATFORMS.items():
         f"{p.rate_rng[0]}--{p.rate_rng[1]} & "
         f"{p.rho_rng[0]}--{p.rho_rng[1]} & {p.blink_p:.2f} \\\\")
 parts.append(r"""
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:s2}Platform parameter priors (ranges anchored to the
 published photophysics cited in the main text). $\rho$ is sampled from a
 70/30 bimodal mixture over its range (localized-emitter vs.
@@ -93,7 +93,7 @@ bay = " & ".join(f"${e2['bayes_acc'][str(t)]*100:.1f}$" for t in T)
 rows.append(f"MC-Bayes reference & {bay} \\\\")
 head = " & ".join(f"{t}\\,s" for t in T)
 parts.append(r"""
-\begin{table*}[h]
+\begin{table*}[!htbp]
 \caption{\label{tab:s3}Balanced classification accuracy (\%, mean $\pm$
 1~s.d.\ over five noise seeds; boundary band excluded) versus acquisition
 time on the NV prior. The Monte-Carlo Bayes row is the
@@ -116,7 +116,7 @@ for m, label in names.items():
                       for a in e2["results"][m]["mae"])
     rows.append(f"{label} & {maes} \\\\")
 parts.append(r"""
-\begin{table*}[h]
+\begin{table*}[!htbp]
 \caption{\label{tab:s3b}$g^{(2)}(0)$ regression MAE versus acquisition
 time (mean $\pm$ 1~s.d.\ over five seeds; all sites including the
 boundary band).}
@@ -138,7 +138,7 @@ for th, d in e2["anytime"].items():
                 f"{d['mean_ms']:.0f} & {100*d['acc']:.1f} & "
                 f"{100*d['frac_full']:.1f}\\% \\\\")
 parts.append(r"""
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:s4}Anytime operation of the spiking readout at
 $T{=}1$\,s: commitment latency and accuracy versus the confidence gate.}
 \small
@@ -158,7 +158,7 @@ for tt, d in e2["energy"].items():
                 f"{d['e_cnn_fp32_nJ']/1e3:.2f} & {d['e_cnn_int8_nJ']/1e3:.2f} & "
                 f"{d['adv_fp32']:.0f} & {d['adv_int8']:.0f} \\\\")
 parts.append(r"""
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:s5}Measured event-driven energy accounting per
 decision (synops at 23.6\,pJ, Loihi; dense MACs at 4.6\,pJ FP32 /
 1\,pJ INT8).}
@@ -182,7 +182,7 @@ for tt, d in e3["evals"].items():
                 f"{100*d['adjoint']['acc']:.1f} & "
                 f"{d['default']['mae']:.3f} & {d['adjoint']['mae']:.3f} \\\\")
 parts.append(r"""
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:s6}Adjoint protocol co-optimization: balanced
 accuracy (\%) and $g^{(2)}(0)$ MAE at the default protocol
 $(s{=}1, \tau_{\max}{=}60.5\,\mathrm{ns})$ versus the adjoint optimum
@@ -209,7 +209,7 @@ try:
                     f"{s['n_windows']} & "
                     f"{'held out' if s['held_out'] else 'train'} \\\\")
     parts.append(r"""
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:s7}The eight experimental quantum-dot HBT
 measurement series (sps-quality, FI-SEQUR demonstrator), analyzed as
 nine records: the 2.5-$\mu$W series was recorded in two sessions
@@ -235,7 +235,7 @@ Series & $g^{(2)}(0)$ ref. & $T$ (s) & 30-s windows & Split \\
                     f"{tr:.3f} \\\\" if tr is not None else
                     f"{lbl[m]} & {d['mae_held_out']:.3f} & n/a \\\\")
     parts.append(r"""
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:s8}Early (30-s) $g^{(2)}(0)$ estimation MAE on real
 data against each series' asymptotic reference.}
 \small
@@ -271,7 +271,7 @@ try:
     except FileNotFoundError:
         pass
     parts.append(r"""
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:s9}Closed-loop triage evaluation on 30 held-out
 48-site fields: total measurement time per field, certification
 precision and recall of good emitters, and throughput.}
@@ -306,7 +306,7 @@ try:
         rows.append(lbl[m] + " & " + " & ".join(cells) + " \\\\")
     head = " & ".join(f"{p} {t}s" for p in plats for t in Ts)
     parts.append(r"""
-\begin{table*}[h]
+\begin{table*}[!htbp]
 \caption{\label{tab:s10}Cross-platform transfer: balanced accuracy (\%)
 per platform and acquisition time (mean $\pm$ 1~s.d.\ over three seeds).
 All four real platforms are zero-shot for the two synthetic-trained
