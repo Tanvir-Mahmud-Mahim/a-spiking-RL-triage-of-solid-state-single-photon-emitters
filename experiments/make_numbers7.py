@@ -152,7 +152,7 @@ which is the channel through which blinking chiefly enters the
 triage label, and the stream twin, which models blinking exactly, is
 the instrument used for validation and stress tests throughout.
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:sweep}Stream simulator versus numerically exact
 master-equation $g^{(2)}(\tau)$ over random and boundary parameter
 sets from the full priors (121 delay bins, Poisson errors; detected
@@ -170,7 +170,7 @@ NRMSE \\
 \end{center}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:b2sweep}Histogram twin versus stream twin over
 compound operating conditions ($\tau_1 = 14$\,ns, $\tau_2 = 250$\,ns,
 $a = 0.8$; 60 repeated 1-s acquisitions each; IRF jitter on;
@@ -215,7 +215,7 @@ verified rather than assumed; any residual correlations are bounded
 below the per-bin shot noise that dominates the photon-sparse
 regime.
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:cov}Bin-to-bin correlation statistics of
 stream-simulator histograms (""" + str(cN["n_rep"]) + r""" repetitions;
 off-diagonal elements of the $121 \times 121$ correlation matrix;
@@ -275,7 +275,7 @@ acquisition times and why the main text draws the reference only
 for the photon-sparse regime and makes no near-optimality claim in
 the asymptotic regime.
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:bconv}Convergence of the Monte-Carlo Bayes
 reference with reference-sample size $M$ (balanced accuracy, \%, on
 the fixed 1200-site NV evaluation population, single noise seed;
@@ -320,7 +320,7 @@ speedups are not an artifact of evaluating exactly on the training
 prior, although operation far outside the priors would call for
 retraining, which the twin makes inexpensive.
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \caption{\label{tab:pshift}Balanced accuracy (\%) of the trained
 estimators under deliberately shifted evaluation priors (no
 retraining; 1200 sites per prior; single noise seed).}
