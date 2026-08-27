@@ -36,8 +36,9 @@ for i, (px, py) in enumerate(pts):
                color=C["aqua"] if i in good else "#b9b8af", zorder=3)
 ax.scatter([pts[9, 0]], [pts[9, 1]], s=95, facecolor="none",
            edgecolor=C["red"], lw=1.3, zorder=4)
-ax.text(0.46, 0.47, "emitter field", ha="center", fontsize=8.0,
-        color=INK, fontweight="bold")
+ax.text(0.40, 0.47, "emitter field", ha="center", fontsize=8.0,
+        color=INK, fontweight="bold", zorder=6,
+        bbox=dict(facecolor="white", edgecolor="none", pad=0.6))
 
 # ---- middle: spiking estimator -----------------------------------------
 box(1.22, 0.62, 0.86, 0.80, C["aqua"], "#eef8f2")
@@ -65,8 +66,8 @@ ax.text(2.81, 0.76, "6$\\times$ faster", ha="center", fontsize=8.2,
 arrow(0.84, 1.02, 1.20, 1.02)
 ax.text(1.02, 1.12, "photons", ha="center", fontsize=6.8, color=INK2)
 arrow(2.10, 1.02, 2.46, 1.02)
-# closed-loop return
-arrow(2.83, 0.60, 0.50, 0.615, color=C["violet"], lw=1.5, rad=-0.22)
+# closed-loop return (ends right of the emitter-field label, no overlap)
+arrow(2.83, 0.60, 0.76, 0.60, color=C["violet"], lw=1.5, rad=-0.20)
 ax.text(1.63, 0.075, "closed loop: adaptive exposure per site",
         ha="center", fontsize=7.4, color=C["violet"])
 
