@@ -342,7 +342,7 @@ def _telegraph_gate(times, ton_ns, toff_ns, T_ns, rng):
 def _detector_chain(t, imp: DetectorImpairments, rng):
     """IRF jitter + dead time + afterpulsing."""
     t = np.sort(t + rng.normal(0, imp.sigma_irf_ns, len(t)))
-    # dead time (sequential — vectorized via greedy pass)
+    # dead time (sequential -- vectorized via greedy pass)
     keep = np.ones(len(t), bool)
     last = -np.inf
     for i in range(len(t)):           # rates ~1e5/s -> arrays are small enough

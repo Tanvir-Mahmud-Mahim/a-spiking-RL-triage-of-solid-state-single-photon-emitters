@@ -7,7 +7,7 @@ their rates (log-mid and log-span) and a radiative flag.  A small
 message-passing network (Gilmer et al., 2017) embeds the template into a
 conditioning vector consumed by the estimator (concatenated to its inputs,
 i.e., FiLM-style bias conditioning).  Because the embedding is a function
-of the physics graph — not a platform ID — the estimator can zero-shot to
+of the physics graph -- not a platform ID -- the estimator can zero-shot to
 platforms never seen in training.
 """
 from __future__ import annotations

@@ -3,6 +3,8 @@ and the loader for the real experimental HBT dataset (UTS-CASLab
 sps-quality, FI-SEQUR InGaAs/GaAs quantum dot; Kedziora et al., MLST 2023).
 """
 from __future__ import annotations
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import glob
 import os
 import numpy as np
@@ -67,7 +69,7 @@ def make_batch(rng, batch, T_dist=("logu", 0.03, 30.0), platform="NV",
         site_list.append(site)
     # classification margin: boundary sites (0.4 < g2(0) < 0.6) are
     # excluded from the classification metric/loss (regression covers
-    # them) — triage decides clear cases; boundary cases need precision
+    # them) -- triage decides clear cases; boundary cases need precision
     # metrology, not classification.
     y_valid = (np.abs(y_g2 - 0.5) > 0.1)
     y_good = np.array([1 if s.is_good else 0 for s in site_list], np.int64)
@@ -86,7 +88,7 @@ def make_eval_set(rng, n, T_s, platform="NV", cfg=CFG, n_slices=N_SLICES,
 # Real experimental data (sps-quality, FI-SEQUR demonstrator sample)
 # ----------------------------------------------------------------------
 
-FISEQUR_DIR = "/home/claude/sps-quality/data/InGaAs-GaAs QDs/FI-SEQUR project demonstrator sample"
+FISEQUR_DIR = _os.environ.get("SPS_QUALITY", _os.path.join(_os.path.dirname(_ROOT), "sps-quality")) + "/data/InGaAs-GaAs QDs/FI-SEQUR project demonstrator sample"
 
 
 def load_fisequr(path_dir=FISEQUR_DIR):

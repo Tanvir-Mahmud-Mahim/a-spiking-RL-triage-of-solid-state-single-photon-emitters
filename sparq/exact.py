@@ -10,7 +10,7 @@ Under CW excitation, g2(tau) = p_e(tau | p(0) = g) / p_e(ss): after a
 detection the emitter is projected to |g>, and the conditional re-excitation
 probability normalized by the steady state is the intensity correlation.
 Because M is 3x3 with one zero eigenvalue, g2 is *exactly* a sum of two
-exponentials — the analytic form used by the histogram twin — with
+exponentials -- the analytic form used by the histogram twin -- with
 (tau1, tau2, a) given by the eigen-decomposition below.
 """
 import numpy as np

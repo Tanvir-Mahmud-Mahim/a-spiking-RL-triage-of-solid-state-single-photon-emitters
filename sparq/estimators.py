@@ -103,7 +103,7 @@ class HistCNN(nn.Module):
 
 class TriageCNN(HistCNN):
     """HistCNN with an additional *triage* head predicting the full
-    'good emitter' label (pure AND bright AND non-blinking) — blinking is
+    'good emitter' label (pure AND bright AND non-blinking) -- blinking is
     visible to it through the bunching pedestal of the histogram. The
     default forward returns the triage head so the closed-loop
     environment and baselines consume P(good) directly."""
