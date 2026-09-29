@@ -1,4 +1,4 @@
-"""Experiment 2 — estimator envelope: balanced accuracy and g2(0) error vs
+"""Experiment 2 -- estimator envelope: balanced accuracy and g2(0) error vs
 acquisition time for (i) the conventional LM-fit pipeline, (ii) a
 Kudyshev-style CNN on integrated histograms, (iii) the event-driven SNN,
 each trained physics-in-the-loop; plus a 'clean-trained' CNN ablation
@@ -7,12 +7,14 @@ Also: measured event-driven energy accounting.
 
 Writes results/exp2_estimators.json and models to results/models/.
 """
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import json, sys, time, os
 import numpy as np
 import torch
 from scipy.special import gammaln
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.datasets import make_batch, make_eval_set, CFG, N_SLICES
 from sparq.estimators import (HistCNN, SpikingG2Net, train_model, evaluate,
                               fit_g2_histogram, balanced_accuracy)
@@ -47,7 +49,7 @@ def bayes_reference(eval_batches, ref_n=6000, seed=77):
                                    (p_good[v] > 0.5).astype(int))
     return out
 
-os.makedirs("/home/claude/sparq/results/models", exist_ok=True)
+os.makedirs(_ROOT + "/results/models", exist_ok=True)
 rng = np.random.default_rng(11)
 t0 = time.time()
 
@@ -77,10 +79,10 @@ print("== training SNN (physics-in-the-loop, event-driven)")
 snn = SpikingG2Net(CFG.n_bins)
 train_model(snn, gen_pitl, STEPS_SNN, is_snn=True, seed=3)
 
-torch.save(cnn.state_dict(), "/home/claude/sparq/results/models/cnn_pitl.pt")
+torch.save(cnn.state_dict(), _ROOT + "/results/models/cnn_pitl.pt")
 torch.save(cnn_clean.state_dict(),
-           "/home/claude/sparq/results/models/cnn_clean.pt")
-torch.save(snn.state_dict(), "/home/claude/sparq/results/models/snn_pitl.pt")
+           _ROOT + "/results/models/cnn_clean.pt")
+torch.save(snn.state_dict(), _ROOT + "/results/models/snn_pitl.pt")
 print(f"training done ({time.time()-t0:.0f}s)")
 
 # ------------------------------------------------------------- evaluation
@@ -174,7 +176,7 @@ print("anytime:", {k: (v["median_ms"], round(v["acc"], 3))
 # ------------------------------------------------------------- energy
 E_SYNOP = 23.6e-12       # J per synaptic op, Intel Loihi (Davies 2018)
 E_MAC_FP32 = 4.6e-12     # J per 32-bit MAC, 45 nm CMOS (Horowitz 2014)
-E_MAC_INT8 = 1.0e-12     # J per 8-bit MAC, edge accelerator class
+E_MAC_INT8 = 0.23e-12     # J per 8-bit integer MAC: 0.2 pJ mult + 0.03 pJ add (Horowitz 2014)
 energy = {}
 for T in [0.1, 1.0, 10.0]:
     r = np.random.default_rng(31)
@@ -200,6 +202,6 @@ out = dict(T_grid=T_GRID, results=results, time_to_target=ttt,
            p_good=float(np.mean([s.g2_0 < 0.5 for s in eval_sites])),
            speedup_fit_over_snn=float(ttt["fit"] / ttt["snn_pitl"])
            if np.isfinite(ttt["fit"]) and np.isfinite(ttt["snn_pitl"]) else None)
-with open("/home/claude/sparq/results/exp2_estimators.json", "w") as f:
+with open(_ROOT + "/results/exp2_estimators.json", "w") as f:
     json.dump(out, f)
 print(f"saved. total {time.time()-t0:.0f}s")

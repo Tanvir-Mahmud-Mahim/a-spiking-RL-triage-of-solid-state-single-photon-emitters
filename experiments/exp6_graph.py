@@ -1,20 +1,22 @@
-"""Experiment 6 — graph-encoded photophysics for cross-platform transfer.
+"""Experiment 6 -- graph-encoded photophysics for cross-platform transfer.
 
 Three estimators: (i) unconditioned, trained on NV + hBN; (ii) graph-
 conditioned (level-structure template embedded by a message-passing
 encoder), trained on NV + hBN; (iii) oracle, trained on all four
-platforms.  Zero-shot evaluation on GaN and SiV — platforms never seen
-by (i) and (ii) — quantifies how much physics-graph conditioning recovers
+platforms.  Zero-shot evaluation on GaN and SiV -- platforms never seen
+by (i) and (ii) -- quantifies how much physics-graph conditioning recovers
 of the transfer gap.
 
 Writes results/exp6_graph.json.
 """
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import json, sys, time
 import numpy as np
 import torch
 import torch.nn.functional as F
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.datasets import make_batch, make_eval_set, CFG
 from sparq.estimators import HistCNN, balanced_accuracy
 from sparq.gnn import GraphEncoder, template_graph
@@ -127,10 +129,10 @@ out = dict(results=results, steps=STEPS,
                        oracle=mean_unseen("oracle_4p"),
                        gap_recovery=float(gap_recovery)))
 print("unseen-platform summary:", out["unseen"])
-with open("/home/claude/sparq/results/exp6_graph.json", "w") as f:
+with open(_ROOT + "/results/exp6_graph.json", "w") as f:
     json.dump(out, f)
 
 # save the graph-conditioned model for the figure/paper
 torch.save(models["graph_2p"][0].state_dict(),
-           "/home/claude/sparq/results/models/cnn_graph.pt")
+           _ROOT + "/results/models/cnn_graph.pt")
 print(f"saved ({time.time()-t0:.0f}s)")

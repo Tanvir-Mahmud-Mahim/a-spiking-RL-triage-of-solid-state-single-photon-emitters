@@ -1,4 +1,4 @@
-"""Experiment 6b — platform-randomized graph transfer.
+"""Experiment 6b -- platform-randomized graph transfer.
 
 The failure mode of naive graph conditioning (exp6: two training
 platforms -> the embedding degenerates into a platform ID and hurts
@@ -10,16 +10,18 @@ graph to photon statistics rather than memorize embeddings.
 Models: (i) unconditioned, trained on the synthetic platform
 distribution; (ii) graph-conditioned, same data; (iii) oracle trained on
 the four real platforms. Zero-shot evaluation of (i) and (ii) on
-NV, hBN, GaN, SiV — none of which appear in their training.
+NV, hBN, GaN, SiV -- none of which appear in their training.
 
 Writes results/exp6b_graph.json (supersedes exp6 in the paper).
 """
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import json, sys, time
 import numpy as np
 import torch
 import torch.nn.functional as F
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.datasets import make_batch, make_eval_set, CFG
 from sparq.estimators import HistCNN, balanced_accuracy
 from sparq.gnn import GraphEncoder, template_graph
@@ -180,8 +182,8 @@ out = dict(results=results, steps=STEPS,
                        oracle=mean_over("oracle_real", ALL_PLATFORMS),
                        gap_recovery=float(gap)))
 print("zero-shot summary:", out["unseen"])
-with open("/home/claude/sparq/results/exp6b_graph.json", "w") as f:
+with open(_ROOT + "/results/exp6b_graph.json", "w") as f:
     json.dump(out, f)
 torch.save(models["graph_syn"][0].state_dict(),
-           "/home/claude/sparq/results/models/cnn_graph_syn.pt")
+           _ROOT + "/results/models/cnn_graph_syn.pt")
 print(f"saved ({time.time()-t0:.0f}s)")

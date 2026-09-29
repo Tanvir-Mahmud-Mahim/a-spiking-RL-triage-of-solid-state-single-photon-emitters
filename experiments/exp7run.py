@@ -13,10 +13,12 @@ Each part writes results/exp7_parts/<part>.json; `merge` assembles
 results/exp7_reviewer.json in the schema make_numbers7.py expects.
 Physics module is used untouched.
 """
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import argparse, json, os, sys, time, dataclasses
 import numpy as np
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.physics import (HBTConfig, EmitterSite, PLATFORMS,
                            DetectorImpairments, correlate,
                            simulate_photon_stream, expected_histogram,
@@ -25,7 +27,7 @@ from sparq.exact import g2_exact, rates_from_site
 from sparq.datasets import make_eval_set, CFG
 from sparq.estimators import balanced_accuracy
 
-R = "/home/claude/sparq/results"
+R = _ROOT + "/results"
 PD = f"{R}/exp7_parts"
 os.makedirs(PD, exist_ok=True)
 t0 = time.time()

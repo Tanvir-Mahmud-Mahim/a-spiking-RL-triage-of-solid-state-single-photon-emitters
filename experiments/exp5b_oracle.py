@@ -1,4 +1,4 @@
-"""Exp 5b — clairvoyant (oracle-stopping) bound for per-site triage.
+"""Exp 5b -- clairvoyant (oracle-stopping) bound for per-site triage.
 
 For each site, expose in 0.25-s steps and stop at the FIRST moment the
 running posterior agrees with the ground truth (cap 5 s); decide
@@ -9,18 +9,20 @@ policy family (heuristics and learned agents alike).
 Writes results/exp5b_oracle.json using the same evaluation fields and
 noise seeds as exp5.
 """
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import json, sys
 import numpy as np
 import torch
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.estimators import TriageCNN
 from sparq.datasets import CFG
 from sparq.rl_env import TriageEnv, A_MEAS0, A_REJECT, A_CERTIFY
 
 est = TriageCNN(CFG.n_bins)
 est.load_state_dict(torch.load(
-    "/home/claude/sparq/results/models/cnn_triage.pt"))
+    _ROOT + "/results/models/cnn_triage.pt"))
 est.eval()
 
 field_rng = np.random.default_rng(4242)
@@ -46,5 +48,5 @@ keys = ("time_s", "precision", "recall", "good_per_min", "n_false")
 summary = {k: [float(np.mean([o[k] for o in outs])),
                float(np.std([o[k] for o in outs]))] for k in keys}
 print("oracle stopping:", {k: round(v[0], 3) for k, v in summary.items()})
-with open("/home/claude/sparq/results/exp5b_oracle.json", "w") as f:
+with open(_ROOT + "/results/exp5b_oracle.json", "w") as f:
     json.dump(summary, f)

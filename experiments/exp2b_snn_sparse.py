@@ -1,4 +1,4 @@
-"""Experiment 2b — activity-regularized (sparse) spiking estimator.
+"""Experiment 2b -- activity-regularized (sparse) spiking estimator.
 
 Identical to the exp2 SNN but trained with a spike-rate penalty (standard
 neuromorphic practice) so hidden activity is event-driven rather than
@@ -7,12 +7,14 @@ energy; results supersede the exp2 SNN rows via make_numbers.
 
 Writes results/exp2b_snn.json and models/snn_sparse.pt.
 """
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import json, sys, time
 import numpy as np
 import torch
 import torch.nn.functional as F
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.datasets import make_batch, make_eval_set, CFG, N_SLICES
 from sparq.estimators import (SpikingG2Net, evaluate, balanced_accuracy,
                               HistCNN)
@@ -58,7 +60,7 @@ for step in range(STEPS):
               f"activity {float(activity)*100:.2f}%", flush=True)
 snn.eval()
 torch.save(snn.state_dict(),
-           "/home/claude/sparq/results/models/snn_sparse.pt")
+           _ROOT + "/results/models/snn_sparse.pt")
 
 # ---------------------------------------------------------------- sweep
 site_rng = np.random.default_rng(999)
@@ -112,7 +114,7 @@ print("anytime:", {k: (v["median_ms"], round(v["acc"], 3))
 # ---------------------------------------------------------------- energy
 E_SYNOP = 23.6e-12
 E_MAC_FP32 = 4.6e-12
-E_MAC_INT8 = 1.0e-12
+E_MAC_INT8 = 0.23e-12     # J per 8-bit integer MAC: 0.2 pJ mult + 0.03 pJ add (Horowitz 2014)
 cnn_macs = HistCNN(CFG.n_bins).macs_per_inference(CFG.n_bins)
 energy = {}
 for T in [0.1, 1.0, 10.0]:
@@ -132,6 +134,6 @@ for T in [0.1, 1.0, 10.0]:
 
 out = dict(T_grid=T_GRID, snn_sparse=res, time_to_target=ttt,
            anytime=anytime, energy=energy, lambda_spk=LAMBDA_SPK)
-with open("/home/claude/sparq/results/exp2b_snn.json", "w") as f:
+with open(_ROOT + "/results/exp2b_snn.json", "w") as f:
     json.dump(out, f)
 print(f"saved ({time.time()-t0:.0f}s)")

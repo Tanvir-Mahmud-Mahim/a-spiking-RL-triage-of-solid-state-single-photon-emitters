@@ -1,8 +1,10 @@
-"""Exp 4c — information-floor decomposition of the sim-to-real error:
+"""Exp 4c -- information-floor decomposition of the sim-to-real error:
 in-domain twin MAE at matched 30-s count statistics, restricted to the
 g2(0) range of the held-out real series. Writes results/exp4c_floor.json."""
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import sys, json
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 import numpy as np, torch
 import torch.nn.functional as F
 from sparq.physics import HBTConfig
@@ -54,6 +56,6 @@ with torch.no_grad():
         errs.append(e[m])
 errs = np.concatenate(errs)
 out = dict(floor_mae=float(errs.mean()), n=len(errs))
-with open("/home/claude/sparq/results/exp4c_floor.json", "w") as f:
+with open(_ROOT + "/results/exp4c_floor.json", "w") as f:
     json.dump(out, f)
 print(out)

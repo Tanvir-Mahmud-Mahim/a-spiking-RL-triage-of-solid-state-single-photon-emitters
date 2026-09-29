@@ -1,4 +1,4 @@
-"""Experiment 5 — closed-loop triage with discrete-action SAC + PER.
+"""Experiment 5 -- closed-loop triage with discrete-action SAC + PER.
 
 The agent triages 48-site confocal fields inside the validated twin,
 perceiving the physics-in-the-loop estimator's posterior and choosing
@@ -8,11 +8,13 @@ ablation quantifies the value of prioritization.
 
 Writes results/exp5_rl.json.
 """
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import json, sys, time
 import numpy as np
 import torch
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.estimators import HistCNN
 from sparq.datasets import CFG
 from sparq.rl_env import (TriageEnv, run_raster, run_adaptive_heuristic,
@@ -30,7 +32,7 @@ SEEDS = (0, 1)
 import os
 from sparq.estimators import TriageCNN, train_triage
 
-EST_PATH = "/home/claude/sparq/results/models/cnn_triage.pt"
+EST_PATH = _ROOT + "/results/models/cnn_triage.pt"
 if os.path.exists(EST_PATH):
     est = TriageCNN(CFG.n_bins)
     est.load_state_dict(torch.load(EST_PATH))
@@ -146,7 +148,7 @@ for i, f in enumerate(EVAL_FIELDS):
              else dwell_rej).append(d_before if a in (3, 4) else d_before)
 ratio = (np.mean(dwell_cert) / max(np.mean(dwell_rej), 1e-9)
          if dwell_cert and dwell_rej else float("nan"))
-with open("/home/claude/sparq/results/exp5_dwell.json", "w") as f:
+with open(_ROOT + "/results/exp5_dwell.json", "w") as f:
     json.dump(dict(ratio=float(ratio),
                    dwell_cert=[float(x) for x in dwell_cert],
                    dwell_rej=[float(x) for x in dwell_rej]), f)
@@ -159,8 +161,8 @@ out = dict(total_steps=TOTAL_STEPS, n_eval_fields=N_EVAL_FIELDS,
            best_per=best,
            p_good_field=float(np.mean(
                [s.is_good for f in EVAL_FIELDS for s in f])))
-with open("/home/claude/sparq/results/exp5_rl.json", "w") as f:
+with open(_ROOT + "/results/exp5_rl.json", "w") as f:
     json.dump(out, f)
 torch.save(best_agent.pi.state_dict(),
-           "/home/claude/sparq/results/models/sac_pi.pt")
+           _ROOT + "/results/models/sac_pi.pt")
 print(f"saved ({time.time()-t0:.0f}s)")

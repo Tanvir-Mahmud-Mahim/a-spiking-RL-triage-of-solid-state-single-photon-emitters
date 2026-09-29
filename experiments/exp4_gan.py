@@ -1,4 +1,4 @@
-"""Experiment 4 — adversarial sim-to-real: WGAN-GP refinement of the
+"""Experiment 4 -- adversarial sim-to-real: WGAN-GP refinement of the
 (pulsed-excitation) twin against real experimental HBT data
 (UTS-CASLab sps-quality, FI-SEQUR InGaAs/GaAs quantum dot, 80 MHz).
 
@@ -17,13 +17,15 @@ Pipeline:
 
 Writes results/exp4_gan.json.
 """
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import json, sys, time
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.datasets import load_fisequr, rebin_real
 from sparq.estimators import HistCNN
 from sparq.physics import HBTConfig
@@ -250,7 +252,7 @@ out = dict(series=[dict(name=r_["name"], g2_ref=r_["g2_ref"],
                         n_windows=len(r_["windows"])) for r_ in real],
            results=res, wgan_log=w_dist_log, gap_closed=float(gap_closed),
            win_s=WIN_SNAPS * 10.0)
-with open("/home/claude/sparq/results/exp4_gan.json", "w") as f:
+with open(_ROOT + "/results/exp4_gan.json", "w") as f:
     json.dump(out, f)
-torch.save(G.state_dict(), "/home/claude/sparq/results/models/gan_G.pt")
+torch.save(G.state_dict(), _ROOT + "/results/models/gan_G.pt")
 print(f"saved ({time.time()-t0:.0f}s)")

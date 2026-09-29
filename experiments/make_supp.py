@@ -1,13 +1,15 @@
-"""Generate paper/supp_tables.tex — all supplementary tables, straight
+"""Generate paper/supp_tables.tex: all supplementary tables, straight
 from the experiment JSONs and the platform priors."""
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import json, sys
 import numpy as np
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.physics import PLATFORMS
 
-R = "/home/claude/sparq/results"
-P = "/home/claude/sparq/paper"
+R = _ROOT + "/results"
+P = _ROOT + "/paper"
 
 
 def load(name):
@@ -27,9 +29,9 @@ for name, d in e1["mc_vs_exact"].items():
                 f"{d['chi2_red']:.3f} & {100*d['nrmse']:.1f}\\% & "
                 f"{100*d['mad']:.1f}\\% \\\\")
 parts.append(r"""
-\begin{table}[!htbp]
-\caption{\label{tab:s1}Stream-twin validation against the numerically
-exact master-equation $g^{(2)}(\tau)$ (no free parameters). Effective
+\begin{table}[!htb]
+\caption{\label{tab:s1}Photon-stream simulator compared with the
+numerically exact master-equation $g^{(2)}(\tau)$ (no free parameters). Effective
 $(\tau_1, \tau_2, a)$ from the eigen-decomposition of the simulated
 rates; $\chi^2_\nu$ over the 121 delay bins with Poisson errors.}
 \small
@@ -54,7 +56,7 @@ for k, p in PLATFORMS.items():
         f"{p.rate_rng[0]}--{p.rate_rng[1]} & "
         f"{p.rho_rng[0]}--{p.rho_rng[1]} & {p.blink_p:.2f} \\\\")
 parts.append(r"""
-\begin{table}[!htbp]
+\begin{table}[!htb]
 \caption{\label{tab:s2}Platform parameter priors (ranges anchored to the
 published photophysics cited in the main text). $\rho$ is sampled from a
 70/30 bimodal mixture over its range (localized-emitter vs.
@@ -82,23 +84,25 @@ try:      # the activity-regularized SNN supersedes the exp2 SNN
 except FileNotFoundError:
     pass
 T = e2["T_grid"]
-names = {"fit": "LM fit", "cnn_clean": "CNN (clean)",
-         "cnn_pitl": "CNN (PITL)", "snn_pitl": "SNN (PITL)"}
+names = {"fit": "LM fit", "cnn_clean": "CNN, long exp.",
+         "cnn_pitl": "CNN, variable exp.", "snn_pitl": "SNN, variable exp."}
 rows = []
 for m, label in names.items():
     accs = " & ".join(f"${a[0]*100:.1f} \\pm {a[1]*100:.1f}$"
                       for a in e2["results"][m]["acc"])
     rows.append(f"{label} & {accs} \\\\")
 bay = " & ".join(f"${e2['bayes_acc'][str(t)]*100:.1f}$" for t in T)
-rows.append(f"MC-Bayes reference & {bay} \\\\")
+rows.append(f"Bayes ref.\\ ($M{{=}}6000$) & {bay} \\\\")
 head = " & ".join(f"{t}\\,s" for t in T)
 parts.append(r"""
-\begin{table*}[!htbp]
+\begin{table*}[!htb]
 \caption{\label{tab:s3}Balanced classification accuracy (\%, mean $\pm$
 1~s.d.\ over five noise seeds; boundary band excluded) versus acquisition
-time on the NV prior. The Monte-Carlo Bayes row is the
-Bayes-optimal reference under the assumed simulation prior (single
-seed; convergence with reference-sample size in Table~\ref{tab:bconv}).}
+time on the NV prior (long exp.: trained on 30-s acquisitions only;
+variable exp.: trained on $T \sim \log\mathcal{U}[0.03, 30]$\,s). The
+last row is the Monte-Carlo Bayes reference under the assumed
+simulation prior with $M = 6000$ reference sites (one reference
+sample); its dependence on $M$ is given in Table~\ref{tab:bconv}.}
 \small
 \begin{ruledtabular}
 \begin{tabular}{l""" + "c" * len(T) + r"""}
@@ -116,7 +120,7 @@ for m, label in names.items():
                       for a in e2["results"][m]["mae"])
     rows.append(f"{label} & {maes} \\\\")
 parts.append(r"""
-\begin{table*}[!htbp]
+\begin{table*}[!htb]
 \caption{\label{tab:s3b}$g^{(2)}(0)$ regression MAE versus acquisition
 time (mean $\pm$ 1~s.d.\ over five seeds; all sites including the
 boundary band).}
@@ -138,9 +142,12 @@ for th, d in e2["anytime"].items():
                 f"{d['mean_ms']:.0f} & {100*d['acc']:.1f} & "
                 f"{100*d['frac_full']:.1f}\\% \\\\")
 parts.append(r"""
-\begin{table}[!htbp]
-\caption{\label{tab:s4}Anytime operation of the spiking readout at
-$T{=}1$\,s: commitment latency and accuracy versus the confidence gate.}
+\begin{table}[!htb]
+\caption{\label{tab:s4}Early decisions of the SNN during a 1-s exposure:
+median and mean time at which the output first crosses the
+commitment gate $\theta$ (on $|p_1 - p_0|$), balanced accuracy of the
+committed decisions, and the fraction of sites that never cross the
+gate within the exposure.}
 \small
 \begin{ruledtabular}
 \begin{tabular}{lcccc}
@@ -154,19 +161,24 @@ Gate & Median (ms) & Mean (ms) & Bal. acc. (\%) & Never-commit \\
 
 rows = []
 for tt, d in e2["energy"].items():
-    rows.append(f"{tt} & {d['synops_mean']/1e3:.1f} & {d['e_snn_nJ']:.1f} & "
-                f"{d['e_cnn_fp32_nJ']/1e3:.2f} & {d['e_cnn_int8_nJ']/1e3:.2f} & "
-                f"{d['adv_fp32']:.0f} & {d['adv_int8']:.0f} \\\\")
+    r32 = d['e_snn_nJ'] / d['e_cnn_fp32_nJ']
+    r8 = d['e_snn_nJ'] / d['e_cnn_int8_nJ']
+    rows.append(f"{tt} & {d['synops_mean']/1e3:.1f} & {d['e_snn_nJ']:.0f} & "
+                f"{d['e_cnn_fp32_nJ']:.0f} & {d['e_cnn_int8_nJ']:.1f} & "
+                f"{r32:.2f} & {r8:.0f} \\\\")
 parts.append(r"""
-\begin{table}[!htbp]
-\caption{\label{tab:s5}Measured event-driven energy accounting per
-decision (synops at 23.6\,pJ, Loihi; dense MACs at 4.6\,pJ FP32 /
-1\,pJ INT8).}
+\begin{table}[!htb]
+\caption{\label{tab:s5}Operation-count energy estimate per decision:
+measured SNN synaptic operations (synops) at 23.6\,pJ each (minimum
+value reported for Loihi) and CNN multiply--accumulates at 4.6\,pJ
+(32-bit floating point) or 0.23\,pJ (8-bit integer) each (45-nm
+CMOS). The last two columns give the SNN energy divided by the CNN
+energy; values above 1 mean that the SNN estimate is higher.}
 \small
 \begin{ruledtabular}
 \begin{tabular}{lcccccc}
-$T$ (s) & synops ($10^3$) & SNN (nJ) & CNN FP32 ($\mu$J) &
-CNN INT8 ($\mu$J) & adv.\ FP32 & adv.\ INT8 \\
+$T$ (s) & synops ($10^3$) & SNN (nJ) & CNN FP32 (nJ) &
+CNN INT8 (nJ) & SNN/CNN FP32 & SNN/CNN INT8 \\
 \hline
 """ + "\n".join(rows) + r"""
 \end{tabular}
@@ -182,16 +194,17 @@ for tt, d in e3["evals"].items():
                 f"{100*d['adjoint']['acc']:.1f} & "
                 f"{d['default']['mae']:.3f} & {d['adjoint']['mae']:.3f} \\\\")
 parts.append(r"""
-\begin{table}[!htbp]
-\caption{\label{tab:s6}Adjoint protocol co-optimization: balanced
-accuracy (\%) and $g^{(2)}(0)$ MAE at the default protocol
-$(s{=}1, \tau_{\max}{=}60.5\,\mathrm{ns})$ versus the adjoint optimum
+\begin{table}[!htb]
+\caption{\label{tab:s6}Joint optimization of the measurement setting
+with the CNN (one training run per setting; 2000 evaluation sites):
+balanced accuracy (\%) and $g^{(2)}(0)$ MAE at the default setting
+$(s{=}1, \tau_{\max}{=}60.5\,\mathrm{ns})$ versus the optimized setting
 $(s^{*}{=}""" + f"{e3['s_star']:.2f}" + r""",
 \tau_{\max}^{*}{=}""" + f"{e3['tau_max_star']:.1f}" + r"""\,\mathrm{ns})$.}
 \small
 \begin{ruledtabular}
 \begin{tabular}{lcccc}
-$T$ (s) & Acc.\ default & Acc.\ adjoint & MAE default & MAE adjoint \\
+$T$ (s) & Acc.\ default & Acc.\ optimized & MAE default & MAE optimized \\
 \hline
 """ + "\n".join(rows) + r"""
 \end{tabular}
@@ -209,7 +222,7 @@ try:
                     f"{s['n_windows']} & "
                     f"{'held out' if s['held_out'] else 'train'} \\\\")
     parts.append(r"""
-\begin{table}[!htbp]
+\begin{table}[!htb]
 \caption{\label{tab:s7}The eight experimental quantum-dot HBT
 measurement series (sps-quality, FI-SEQUR demonstrator), analyzed as
 nine records: the 2.5-$\mu$W series was recorded in two sessions
@@ -226,8 +239,9 @@ Series & $g^{(2)}(0)$ ref. & $T$ (s) & 30-s windows & Split \\
 \end{table}
 """)
     rows = []
-    lbl = {"fit": "Peak-area analysis", "sim": "Twin only",
-           "dr": "Twin + domain rand.", "gan": "Twin + WGAN-GP"}
+    lbl = {"fit": "Peak-area analysis", "sim": "Simulation only",
+           "dr": "Simulation + domain rand.",
+           "gan": "Simulation + WGAN-GP refiner"}
     for m in ("fit", "sim", "dr", "gan"):
         d = e4["results"][m]
         tr = d.get("mae_train_series")
@@ -235,9 +249,11 @@ Series & $g^{(2)}(0)$ ref. & $T$ (s) & 30-s windows & Split \\
                     f"{tr:.3f} \\\\" if tr is not None else
                     f"{lbl[m]} & {d['mae_held_out']:.3f} & n/a \\\\")
     parts.append(r"""
-\begin{table}[!htbp]
-\caption{\label{tab:s8}Early (30-s) $g^{(2)}(0)$ estimation MAE on real
-data against each series' asymptotic reference.}
+\begin{table}[!htb]
+\caption{\label{tab:s8}Mean absolute error of $g^{(2)}(0)$ estimated
+from 30-s windows of the experimental records, relative to the
+peak-area value of each record's full accumulation, for the three
+held-out records and the six records used to train the refiner.}
 \small
 \begin{ruledtabular}
 \begin{tabular}{lcc}
@@ -259,22 +275,31 @@ try:
         return (f"{name} & {s['time_s'][0]:.0f} $\\pm$ {s['time_s'][1]:.0f} & "
                 f"{s['precision'][0]:.3f} & {s['recall'][0]:.3f} & "
                 f"{s['good_per_min'][0]:.2f} \\\\")
+    def pretty(k):
+        kind, par = k.split("_")
+        if kind == "raster":
+            return f"Fixed-dwell raster, {par} s"
+        return f"Threshold controller, $|2p-1| \\geq {par}$"
     for k in sorted(e5["baselines"]):
-        rows.append(row(k.replace("_", " "), e5["baselines"][k]))
+        rows.append(row(pretty(k), e5["baselines"][k]))
     for k in ("per", "uniform"):
         for i, s in enumerate(e5["final"][k]):
-            rows.append(row(f"SAC {'PER' if k=='per' else 'uniform'} "
-                            f"seed {i}", s))
+            rows.append(row(f"RL agent, {'prioritized' if k=='per' else 'uniform'}"
+                            f" replay, seed {i}", s))
     try:
         with open(f"{R}/exp5b_oracle.json") as f:
             rows.append(row("Oracle stopping (bound)", json.load(f)))
     except FileNotFoundError:
         pass
     parts.append(r"""
-\begin{table}[!htbp]
-\caption{\label{tab:s9}Closed-loop triage evaluation on 30 held-out
-48-site fields: total measurement time per field, certification
-precision and recall of good emitters, and throughput.}
+\begin{table}[!htb]
+\caption{\label{tab:s9}Closed-loop triage on 30 held-out simulated
+48-site fields: measurement time per field (mean $\pm$ s.d.\ over
+fields), precision and recall of the certified good emitters, and
+certified good emitters per minute. The threshold controller exposes
+a site in 0.25-s steps until $|2p - 1|$ reaches the stated value or
+the dwell reaches 5\,s; the oracle stops each site as soon as the
+estimate agrees with the ground truth.}
 \small
 \begin{ruledtabular}
 \begin{tabular}{lcccc}
@@ -294,9 +319,9 @@ try:
     plats = ["NV", "hBN", "GaN", "SiV"]
     Ts = [0.3, 3.0]
     rows = []
-    lbl = {"uncond_syn": "Uncond.\\ (synth.)",
-           "graph_syn": "Graph-cond.\\ (synth.)",
-           "oracle_real": "Oracle (real four)"}
+    lbl = {"uncond_syn": "Uncond.\ (synth.)",
+           "graph_syn": "Graph-cond.\ (synth.)",
+           "oracle_real": "Reference (four priors)"}
     for m in ("uncond_syn", "graph_syn", "oracle_real"):
         cells = []
         for p in plats:
@@ -306,11 +331,11 @@ try:
         rows.append(lbl[m] + " & " + " & ".join(cells) + " \\\\")
     head = " & ".join(f"{p} {t}s" for p in plats for t in Ts)
     parts.append(r"""
-\begin{table*}[!htbp]
+\begin{table*}[!htb]
 \caption{\label{tab:s10}Cross-platform transfer: balanced accuracy (\%)
-per platform and acquisition time (mean $\pm$ 1~s.d.\ over three seeds).
-All four real platforms are zero-shot for the two synthetic-trained
-models.}
+on simulated data from each platform prior at two acquisition times
+(mean $\pm$ 1~s.d.\ over three seeds). The four platform priors are
+not seen in training by the two models trained on synthetic classes.}
 \footnotesize
 \begin{ruledtabular}
 \begin{tabular}{l""" + "c" * len(plats) * len(Ts) + r"""}
@@ -325,61 +350,59 @@ except FileNotFoundError:
     pass
 
 parts.append(r'''
-
-% ---- S11: capability comparison (cite-free copy of main-text sota table)
-\providecommand{\scA}[1]{\parbox[t]{0.185\textwidth}{\raggedright #1\strut}}
-\providecommand{\scB}[1]{\parbox[t]{0.105\textwidth}{\raggedright #1\strut}}
-\providecommand{\scC}[1]{\parbox[t]{0.115\textwidth}{\raggedright #1\strut}}
-\providecommand{\scD}[1]{\parbox[t]{0.100\textwidth}{\raggedright #1\strut}}
-\providecommand{\scE}[1]{\parbox[t]{0.115\textwidth}{\raggedright #1\strut}}
-\providecommand{\scF}[1]{\parbox[t]{0.255\textwidth}{\raggedright #1\strut}}
-\newcommand{\tablesotasupp}{%
-\begin{tabular}{llllll}
+\begin{table*}[!htb]
+\caption{\label{tab:s11}Reported results of related machine-learning and
+automated approaches to single-photon-emitter characterization, as
+stated by the respective authors (references as in the main text),
+and the corresponding results of this work. Tasks, data, and baselines
+differ between entries, so the reported numbers are not directly
+comparable.}
+\footnotesize
+\begin{center}
+\begin{tabular}{p{0.16\textwidth}p{0.22\textwidth}p{0.24\textwidth}p{0.30\textwidth}}
 \hline\hline
-\scA{Figure of merit} & \scB{Conventional pipeline} & \scC{Kudyshev '20} &
- \scD{Kudyshev '23} & \scE{Kedziora '23/'25} &
- \scF{\textbf{SPARQ (this work)}} \\[1.5pt]
+Work & Data & Method & Reported result \\
 \hline
-\scA{Matched-accuracy screening speedup} & \scB{$1\times$ (ref.)} &
- \scC{${\sim}10^{2}\times$ vs.\ free fit} &
- \scD{${\sim}12\times$ vs.\ fit ($g^{(2)}$ maps)} & \scE{n/r} &
- \scF{$\speedupSnn\times$ vs.\ strong multi-start fit} \\[1.5pt]
-\scA{Benchmark ceiling used} & \scB{asymptotic fit} &
- \scC{fit baseline} & \scD{fit baseline} & \scE{fit + UQ} &
- \scF{Monte-Carlo Bayes reference under the prior (tracked)} \\[1.5pt]
-\scA{Median decision latency} & \scB{minutes} & \scC{${\sim}1$\,s} &
- \scD{${\sim}10$\,s} & \scE{$\geq 10$\,s} &
- \scF{\anyMedianHalf\,ms, anytime-gateable} \\[1.5pt]
-\scA{Inference energy per decision} & \scB{n/r} & \scC{n/r (GPU)} &
- \scD{n/r (GPU)} & \scE{n/r} &
- \scF{\eSnnPointOneT\,nJ--\eSnnOneTuJ\,$\mu$J, event-proportional}
- \\[1.5pt]
-\scA{Acquisition control} & \scB{open loop} & \scC{open loop} &
- \scD{open loop} & \scE{open loop} &
- \scF{closed loop: $\rlSpeedup\times$ vs.\ raster; oracle bound
- $\xOracleRaster\times$} \\[1.5pt]
-\scA{Measurement-protocol design} & \scB{manual} & \scC{manual} &
- \scD{manual} & \scE{manual} &
- \scF{adjoint: $\tau_{\max}$ $60.5{\to}\wStar$\,ns,
- $+\adjGainSparse$\,pts} \\[1.5pt]
-\scA{Early $g^{(2)}(0)$ MAE, 30-s real windows} &
- \scB{\ganMaeFit{} (peak area)} & \scC{n/r} & \scD{n/r} &
- \scE{own data, with UQ} &
- \scF{\ganMaeSim{} zero-shot (floor \floorMae)} \\[1.5pt]
-\scA{Sim-to-real audit} & \scB{n/a} & \scC{none} & \scD{none} &
- \scE{bootstrap UQ} &
- \scF{floor decomposition + GAN critic (\pctRemovable\% of removable
- error closed)} \\[1.5pt]
-\scA{Cross-platform transfer} & \scB{n/a} & \scC{none} & \scD{none} &
- \scE{fine-tuning, limited benefit} &
- \scF{zero-shot physics graphs: \gGapRecovery\% of oracle gap}
- \\[1.5pt]
-\scA{Open release} & \scB{n/a} & \scC{none} & \scD{on request} &
- \scE{data + code} &
- \scF{code (GitHub) + benchmark data + trained models (Zenodo)} \\
+Kudyshev \emph{et al.}, 2020 & Sparse HBT autocorrelation histograms &
+ Supervised classification (single or not single), including a 1D
+ convolutional network & 95\% accuracy within an integration time of
+ less than 1\,s; roughly 100-fold speedup over Levenberg--Marquardt
+ fitting \\[2pt]
+Kudyshev \emph{et al.}, 2023 & Photon-correlation histograms in
+ antibunching (quantum super-resolution) microscopy &
+ Convolutional-network regression & 12-fold speed-up compared with
+ fitting-based autocorrelation measurements \\[2pt]
+Narun \emph{et al.}, 2022 & Photoluminescence images & Image analysis
+ and regression fitting & Automated identification and classification
+ of emitters in nanodiamond arrays and hBN flakes \\[2pt]
+Xu \emph{et al.}, 2024 & Higher-order photon-correlation data &
+ Two-dimensional convolutional-network classification of photon
+ states up to $|3\rangle$ & 94\% overall accuracy; 90\% with 800
+ co-detection events \\[2pt]
+Kedziora \emph{et al.}, 2023 & Eight experimental HBT datasets of one
+ InGaAs/GaAs quantum dot & Bootstrap data augmentation to quantify the
+ uncertainty of early estimates & Significant uncertainty from Poisson
+ variability; least-squares fitting comparable to Poisson likelihood
+ \\[2pt]
+Kedziora \emph{et al.}, 2025 & Same quantum dot, eight excitation
+ contexts & Transfer learning with linear and ensemble regressors
+ (trained on seven contexts, tested on the eighth) & Regressors can
+ outperform least-squares fitting within trained contexts; success of
+ transfer less assured \\[2pt]
+This work & Simulated CW HBT histograms and time-sliced coincidence
+ records; experimental data of Kedziora \emph{et al.} for testing &
+ Spiking and convolutional networks; RL exposure control; graph
+ conditioning on the emitter class & In simulation: $\speedupSnn\times$
+ less acquisition time than a multi-start LM fit at \targetAcc\%
+ balanced accuracy, and $\rlSpeedup\times$ faster field screening than
+ fixed dwell. On experimental 30-s windows: $\xFitOverSim\times$ lower
+ $g^{(2)}(0)$ error than peak-area analysis \\
 \hline\hline
-\end{tabular}}
+\end{tabular}
+\end{center}
+\end{table*}
 ''')
+
 
 out = "\n".join(parts)
 import re as _re

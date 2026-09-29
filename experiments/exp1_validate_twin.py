@@ -1,4 +1,4 @@
-"""Experiment 1 — validate the twin end to end.
+"""Experiment 1 -- validate the twin end to end.
 
 (a) Full Monte-Carlo photon streams vs the numerically exact master-equation
     g2(tau) for three emitter regimes (NV-like, hBN-like, GaN-like).
@@ -7,10 +7,12 @@
 
 Writes results/exp1_validation.json and arrays for the validation figure.
 """
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import json, sys, time
 import numpy as np
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.physics import (HBTConfig, EmitterSite, correlate,
                            simulate_photon_stream, expected_histogram,
                            g2_measured)
@@ -108,6 +110,6 @@ out["summary"] = dict(
     rel_mean_err_pct=rel_mean_err * 100,
     fano=fano_mc,
 )
-with open("/home/claude/sparq/results/exp1_validation.json", "w") as f:
+with open(_ROOT + "/results/exp1_validation.json", "w") as f:
     json.dump(out, f)
 print("saved. total", time.time() - t0, "s")

@@ -1,4 +1,4 @@
-"""Experiment 3 — adjoint (pathwise-gradient) co-optimization of the
+"""Experiment 3 -- adjoint (pathwise-gradient) co-optimization of the
 measurement protocol through the differentiable twin.
 
 The protocol theta = (log saturation parameter s, log window tau_max) is
@@ -10,12 +10,14 @@ adjoint optimum tracks the information-theoretic optimum of the physics.
 
 Writes results/exp3_adjoint.json.
 """
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import json, sys, time
 import numpy as np
 import torch
 import torch.nn.functional as F
 
-sys.path.insert(0, "/home/claude/sparq")
+sys.path.insert(0, _ROOT)
 from sparq.physics import sample_site
 from sparq.twin_torch import (torch_expected_hist, reparam_counts,
                               base_tensors, fisher_info_g2zero)
@@ -64,6 +66,7 @@ def train(protocol_free, seed):
     net = HistCNN(N_BINS)
     th_s = torch.tensor(0.0, requires_grad=protocol_free)
     th_w = torch.tensor(float(np.log(60.5)), requires_grad=protocol_free)
+    params = list(net.parameters()) + ([th_s, th_w] if protocol_free else [])
     opt = torch.optim.Adam([
         {"params": net.parameters(), "lr": 1e-3},
         {"params": [th_s, th_w], "lr": 3e-2},
@@ -135,6 +138,6 @@ print(f"FI-optimal s = {s_star_fi:.2f}")
 out = dict(steps=STEPS, evals=evals, trajectory=traj,
            s_star=float(torch.exp(s1)), tau_max_star=float(torch.exp(w1)),
            fisher=dict(s_grid=s_grid.tolist(), fi=fi, s_star=s_star_fi))
-with open("/home/claude/sparq/results/exp3_adjoint.json", "w") as f:
+with open(_ROOT + "/results/exp3_adjoint.json", "w") as f:
     json.dump(out, f)
 print(f"saved ({time.time()-t0:.0f}s)")
