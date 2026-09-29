@@ -1,0 +1,28 @@
+{
+ "no_impairments": {
+  "n_rep": 1000,
+  "acq_T_s": 0.5,
+  "mean_abs_offdiag": 0.025798613294904037,
+  "p95_abs_offdiag": 0.06364020525781518,
+  "max_abs_offdiag": 0.13295235344155584,
+  "adjacent_mean": -0.005535023934435,
+  "adjacent_max": 0.09310531141891881,
+  "noise_floor": 0.03162277660168379,
+  "frac_above_2sigma": 0.05096418732782369,
+  "fano": 1.0006596258910285,
+  "mean_bin_count": 34.34311570247934
+ },
+ "with_impairments": {
+  "n_rep": 1000,
+  "acq_T_s": 0.5,
+  "mean_abs_offdiag": 0.025012409957080005,
+  "p95_abs_offdiag": 0.06292564103274861,
+  "max_abs_offdiag": 0.14412252797160624,
+  "adjacent_mean": -0.0014660076250699468,
+  "adjacent_max": 0.09922782569801983,
+  "noise_floor": 0.03162277660168379,
+  "frac_above_2sigma": 0.049035812672176306,
+  "fano": 0.9917755014451918,
+  "mean_bin_count": 34.85619008264463
+ }
+}

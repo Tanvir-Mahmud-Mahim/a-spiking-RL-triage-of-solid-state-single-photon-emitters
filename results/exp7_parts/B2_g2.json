@@ -1,0 +1,20 @@
+[
+ {
+  "lbl": "N2-rho0.9-highrate",
+  "n": 2,
+  "rho": 0.9,
+  "rate": 1000,
+  "blink": false,
+  "rel_mean_err_pct": 1.3145617866801391,
+  "fano": 0.998617696192042
+ },
+ {
+  "lbl": "N1-rho0.85-blinking",
+  "n": 1,
+  "rho": 0.85,
+  "rate": 400,
+  "blink": true,
+  "rel_mean_err_pct": 14.424235531420448,
+  "fano": 1.1537096791580737
+ }
+]

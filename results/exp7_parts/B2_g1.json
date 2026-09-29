@@ -1,0 +1,20 @@
+[
+ {
+  "lbl": "N3-rho0.6-IRF",
+  "n": 3,
+  "rho": 0.6,
+  "rate": 800,
+  "blink": false,
+  "rel_mean_err_pct": 0.7491184014586265,
+  "fano": 0.9786359280944931
+ },
+ {
+  "lbl": "N1-rho0.7-lowrate",
+  "n": 1,
+  "rho": 0.7,
+  "rate": 80,
+  "blink": false,
+  "rel_mean_err_pct": 8.414805541793235,
+  "fano": 1.0137114957436058
+ }
+]
