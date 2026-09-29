@@ -1,6 +1,8 @@
 """ACS Photonics Table-of-Contents graphic: exactly 3.25 x 1.75 in."""
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import sys
-sys.path.insert(0, "/home/claude/sparq/figures")
+sys.path.insert(0, _ROOT + "/figures")
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mp
@@ -68,9 +70,9 @@ ax.text(1.02, 1.12, "photons", ha="center", fontsize=6.8, color=INK2)
 arrow(2.10, 1.02, 2.46, 1.02)
 # closed-loop return (ends right of the emitter-field label, no overlap)
 arrow(2.83, 0.60, 0.76, 0.60, color=C["violet"], lw=1.5, rad=-0.20)
-ax.text(1.63, 0.075, "closed loop: adaptive exposure per site",
+ax.text(1.63, 0.075, "adaptive exposure per site (in simulation)",
         ha="center", fontsize=7.4, color=C["violet"])
 
-fig.savefig("/home/claude/sparq/figures/toc_graphic.pdf")
-fig.savefig("/home/claude/sparq/figures/toc_graphic.png", dpi=400)
+fig.savefig(_ROOT + "/figures/toc_graphic.pdf")
+fig.savefig(_ROOT + "/figures/toc_graphic.png", dpi=400)
 print("toc done: 3.25 x 1.75 in")

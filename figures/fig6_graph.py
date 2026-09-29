@@ -1,18 +1,20 @@
-"""Figure 6 — graph-encoded cross-platform transfer (single column)."""
+"""Figure 6 -- graph-encoded cross-platform transfer (single column)."""
+import os as _os
+_ROOT = _os.environ.get("SPARQ_ROOT", _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import sys, json
-sys.path.insert(0, "/home/claude/sparq/figures")
+sys.path.insert(0, _ROOT + "/figures")
 import numpy as np
 import matplotlib.pyplot as plt
 from style import C, INK, INK2, MUTED, BASE, panel_label, despine
 
-with open("/home/claude/sparq/results/exp6b_graph.json") as f:
+with open(_ROOT + "/results/exp6b_graph.json") as f:
     e6 = json.load(f)
 
 plats = ["NV", "hBN", "GaN", "SiV"]
 Ts = [0.3, 3.0]
 models = [("uncond_syn", MUTED, "unconditioned (synthetic training)"),
           ("graph_syn", C["yellow"], "graph-conditioned (synthetic training)"),
-          ("oracle_real", C["blue"], "oracle (trained on the real four)")]
+          ("oracle_real", C["blue"], "reference (trained on the four classes)")]
 
 fig, ax = plt.subplots(figsize=(3.42, 2.35))
 plt.subplots_adjust(left=0.13, right=0.99, top=0.78, bottom=0.155)
@@ -28,7 +30,7 @@ for j, (m, col, lbl) in enumerate(models):
         sds.append(100 * np.sqrt((acc[:, 1] ** 2).mean()))
     ax.bar(x + (j - 1) * w, means, w, color=col, label=lbl,
            yerr=sds, error_kw=dict(lw=0.7, capsize=1.5, ecolor=INK2))
-ax.set_xlabel("evaluation platform (zero-shot for the synthetic-trained"
+ax.set_xlabel("emitter class (simulated; not seen by the synthetic-trained"
               " models)", fontsize=6.6)
 ax.set_xticks(x)
 ax.set_xticklabels(plats)
@@ -39,6 +41,6 @@ ax.legend(loc="lower left", bbox_to_anchor=(0.0, 1.02), ncol=1,
           labelspacing=0.25, fontsize=6.2)
 despine(ax)
 
-fig.savefig("/home/claude/sparq/figures/fig6_graph.pdf")
-fig.savefig("/home/claude/sparq/figures/fig6_graph.png")
+fig.savefig(_ROOT + "/figures/fig6_graph.pdf")
+fig.savefig(_ROOT + "/figures/fig6_graph.png")
 print("fig6 done")

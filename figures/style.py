@@ -25,12 +25,14 @@ plt.rcParams.update({
     "figure.dpi": 200,
     "savefig.dpi": 300,
     "font.size": 7.8,
-    "font.family": "sans-serif",
-    "font.sans-serif": ["DejaVu Sans", "Helvetica", "Arial"],
+    "font.family": "serif",
+    "font.serif": ["Times New Roman", "Liberation Serif",
+                   "Nimbus Roman", "Times", "DejaVu Serif"],
+    "mathtext.fontset": "stix",
     "axes.labelsize": 7.8,
     "axes.titlesize": 8.4,
     "axes.titleweight": "bold",
-    "axes.edgecolor": BASE,
+    "axes.edgecolor": "black",
     "axes.labelcolor": INK,
     "axes.linewidth": 0.7,
     "axes.prop_cycle": cycler(color=SERIES),
@@ -38,8 +40,10 @@ plt.rcParams.update({
     "grid.color": GRID,
     "grid.linewidth": 0.5,
     "axes.axisbelow": True,
-    "xtick.color": INK2,
-    "ytick.color": INK2,
+    "xtick.color": "black",
+    "xtick.labelcolor": INK,
+    "ytick.color": "black",
+    "ytick.labelcolor": INK,
     "xtick.labelsize": 7.0,
     "ytick.labelsize": 7.0,
     "xtick.major.size": 2.5,
@@ -66,7 +70,7 @@ def panel_label(ax, s, dx=-0.14, dy=1.06):
 
 
 def legend_above(ax, ncol=3, fontsize=6.8, y=1.02, handlelength=1.3):
-    """Legend in a row above the axes — never overlaps data."""
+    """Legend in a row above the axes -- never overlaps data."""
     return ax.legend(loc="lower left", bbox_to_anchor=(0.0, y),
                      ncol=ncol, fontsize=fontsize, frameon=False,
                      handlelength=handlelength, borderpad=0.1,
