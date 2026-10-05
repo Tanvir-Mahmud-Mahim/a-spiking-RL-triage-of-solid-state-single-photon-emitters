@@ -31,28 +31,34 @@ def arrow(x0, y0, x1, y1, color=INK, lw=1.4, rad=0.0):
 # ---- left: emitter field ------------------------------------------------
 box(0.10, 0.62, 0.72, 0.80, INK, "#f4f4f0")
 rngf = np.random.default_rng(5)
-pts = rngf.uniform([0.17, 0.70], [0.75, 1.34], size=(14, 2))
+# 14 well-separated sites (minimum spacing 0.11 in)
+pts = []
+while len(pts) < 14:
+    q = rngf.uniform([0.17, 0.70], [0.75, 1.34])
+    if all(np.hypot(*(q - np.array(r))) > 0.11 for r in pts):
+        pts.append(q)
+pts = np.array(pts)
 good = [1, 5, 9, 12]
 for i, (px, py) in enumerate(pts):
     ax.scatter([px], [py], s=26 if i in good else 16,
                color=C["aqua"] if i in good else "#b9b8af", zorder=3)
 ax.scatter([pts[9, 0]], [pts[9, 1]], s=95, facecolor="none",
            edgecolor=C["red"], lw=1.3, zorder=4)
-ax.text(0.40, 0.47, "emitter field", ha="center", fontsize=8.0,
-        color=INK, fontweight="bold", zorder=6,
-        bbox=dict(facecolor="white", edgecolor="none", pad=0.6))
+# box titles sit above the boxes, clear of the return arrow below
+ax.text(0.46, 1.53, "emitter field", ha="center", fontsize=8.0,
+        color=INK, fontweight="bold")
 
 # ---- middle: spiking estimator -----------------------------------------
 box(1.22, 0.62, 0.86, 0.80, C["aqua"], "#eef8f2")
 # spike raster icon
 rs = np.random.default_rng(3)
-for row, yy in enumerate((1.24, 1.10, 0.96, 0.82)):
+for row, yy in enumerate((1.28, 1.15, 1.02, 0.89)):
     for xx in np.sort(rs.uniform(1.32, 1.96, 4 + (row % 2))):
-        ax.plot([xx, xx], [yy - 0.045, yy + 0.045], color=C["aqua"],
+        ax.plot([xx, xx], [yy - 0.04, yy + 0.04], color=C["aqua"],
                 lw=1.3, solid_capstyle="round")
-ax.text(1.65, 0.70, "decides in ~0.3 s", ha="center", fontsize=6.8,
+ax.text(1.65, 0.67, "decides in ~0.3 s", ha="center", fontsize=6.8,
         color=INK2)
-ax.text(1.65, 0.47, "spiking network", ha="center", fontsize=8.0,
+ax.text(1.65, 1.53, "spiking network", ha="center", fontsize=8.0,
         color=INK, fontweight="bold")
 
 # ---- right: decision ----------------------------------------------------
@@ -63,13 +69,15 @@ ax.text(2.81, 1.01, "reject", ha="center", fontsize=8.0,
         color=C["red"], fontweight="bold")
 ax.text(2.81, 0.76, "6$\\times$ faster", ha="center", fontsize=8.2,
         color=INK, fontweight="bold")
+ax.text(2.81, 1.53, "decision", ha="center", fontsize=8.0,
+        color=INK, fontweight="bold")
 
 # ---- arrows -------------------------------------------------------------
 arrow(0.84, 1.02, 1.20, 1.02)
 ax.text(1.02, 1.12, "photons", ha="center", fontsize=6.8, color=INK2)
 arrow(2.10, 1.02, 2.46, 1.02)
-# closed-loop return (ends right of the emitter-field label, no overlap)
-arrow(2.83, 0.60, 0.76, 0.60, color=C["violet"], lw=1.5, rad=-0.20)
+# closed-loop return below the boxes (no labels in its path)
+arrow(2.81, 0.58, 0.46, 0.58, color=C["violet"], lw=1.5, rad=-0.20)
 ax.text(1.63, 0.075, "adaptive exposure per site (in simulation)",
         ha="center", fontsize=7.4, color=C["violet"])
 

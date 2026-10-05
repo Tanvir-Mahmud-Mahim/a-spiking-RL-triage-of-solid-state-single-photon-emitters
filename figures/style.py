@@ -81,3 +81,23 @@ def legend_above(ax, ncol=3, fontsize=6.8, y=1.02, handlelength=1.3):
 def despine(ax, keep=("left", "bottom")):
     for side in ("top", "right", "left", "bottom"):
         ax.spines[side].set_visible(side in keep)
+
+
+def large_fonts():
+    """Larger text for the full-width, two-row figures (Figs. 2 to 5)."""
+    plt.rcParams.update({
+        "font.size": 9.5,
+        "axes.labelsize": 9.5,
+        "axes.titlesize": 10.0,
+        "xtick.labelsize": 8.5,
+        "ytick.labelsize": 8.5,
+        "legend.fontsize": 8.5,
+        "xtick.major.size": 3.0,
+        "ytick.major.size": 3.0,
+        "lines.markersize": 4.0,
+    })
+
+
+def panel_label_large(ax, s, dx=-0.16, dy=1.10):
+    ax.text(dx, dy, s, transform=ax.transAxes, fontsize=12,
+            fontweight="bold", va="top", ha="left", color=INK)

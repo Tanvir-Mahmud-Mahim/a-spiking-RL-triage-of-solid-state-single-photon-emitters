@@ -6,7 +6,10 @@ sys.path.insert(0, _ROOT + "/figures")
 sys.path.insert(0, _ROOT)
 import numpy as np
 import matplotlib.pyplot as plt
-from style import C, INK, INK2, MUTED, BASE, panel_label, despine
+from style import C, INK, INK2, MUTED, BASE, despine, large_fonts
+from style import panel_label_large as panel_label
+from matplotlib.gridspec import GridSpec
+large_fonts()
 from sparq.datasets import load_fisequr, rebin_real, CFG
 from sparq.estimators import fit_g2_histogram
 from sparq.physics import g2_measured
@@ -14,11 +17,13 @@ from sparq.physics import g2_measured
 with open(_ROOT + "/results/exp1_validation.json") as f:
     e1 = json.load(f)
 
-fig, axes = plt.subplots(1, 5, figsize=(7.05, 1.94))
-# extra headroom hosts the shared (a)-(c) legend as a figure-level row
-# at top left, clear of the panel titles and of the data
-plt.subplots_adjust(left=0.065, right=0.995, top=0.790, bottom=0.207,
-                    wspace=0.55)
+# two rows at full text width: (a)-(c) on top, (d) and (e) below
+fig = plt.figure(figsize=(7.0, 5.6))
+gs = GridSpec(2, 6, figure=fig, left=0.085, right=0.985, top=0.885,
+              bottom=0.085, wspace=1.15, hspace=0.62)
+axes = [fig.add_subplot(gs[0, 0:2]), fig.add_subplot(gs[0, 2:4]),
+        fig.add_subplot(gs[0, 4:6]), fig.add_subplot(gs[1, 0:3]),
+        fig.add_subplot(gs[1, 3:6])]
 
 cols = {"NV-like": C["blue"], "hBN-like": C["aqua"], "GaN-like": C["yellow"]}
 for i, (name, d) in enumerate(e1["mc_vs_exact"].items()):
@@ -28,8 +33,8 @@ for i, (name, d) in enumerate(e1["mc_vs_exact"].items()):
     g2ex = np.array(d["g2_exact"])
     counts = np.array(d["counts"])
     sd = np.sqrt(np.maximum(counts, 1)) / d["flat"]
-    ax.errorbar(tau[::3], g2mc[::3], yerr=sd[::3], fmt="o", ms=1.6,
-                lw=0, elinewidth=0.55, color=cols[name], alpha=0.85,
+    ax.errorbar(tau[::3], g2mc[::3], yerr=sd[::3], fmt="o", ms=2.4,
+                lw=0, elinewidth=0.7, color=cols[name], alpha=0.85,
                 zorder=2, label="photon-stream simulation")
     ax.plot(tau, g2ex, color=INK, lw=1.0, zorder=3, label="exact master equation")
     ax.axhline(1.0, color=BASE, lw=0.5, zorder=1)
@@ -44,23 +49,23 @@ for i, (name, d) in enumerate(e1["mc_vs_exact"].items()):
     chi_pos = {0: (0.96, 0.88, "right"), 1: (0.02, 0.10, "left"),
                2: (0.96, 0.10, "right")}[i]
     ax.text(chi_pos[0], chi_pos[1], rf"$\chi^2_\nu={d['chi2_red']:.2f}$",
-            transform=ax.transAxes, ha=chi_pos[2], fontsize=6.2,
+            transform=ax.transAxes, ha=chi_pos[2], fontsize=8.5,
             color=INK2)
     ax.set_ylim(-0.08, max(2.0, g2ex.max() * 1.15))
     despine(ax)
-    panel_label(ax, f"({'abc'[i]})", dx=-0.34, dy=1.22)
+    panel_label(ax, f"({'abc'[i]})", dx=-0.30, dy=1.16)
 # legend outside the axes (figure-level, above panel (a)) so it never
 # covers the correlation curves
 h0, l0 = axes[0].get_legend_handles_labels()
-fig.legend(h0, l0, loc="upper left", bbox_to_anchor=(0.055, 1.005),
-           ncol=2, frameon=False, fontsize=5.8, handlelength=1.0,
+fig.legend(h0, l0, loc="upper center", bbox_to_anchor=(0.5, 1.0),
+           ncol=2, frameon=False, fontsize=8.5, handlelength=1.4,
            columnspacing=0.9, handletextpad=0.4)
 
 # (d) histogram twin vs stream twin
 ax = axes[3]
 d = e1["twin_vs_mc"]
 tau = np.array(d["tau"])
-ax.plot(tau, d["mu_mc"], "o", ms=1.6, color=C["violet"], alpha=0.85,
+ax.plot(tau, d["mu_mc"], "o", ms=2.4, color=C["violet"], alpha=0.85,
         label="photon-stream simulator")
 ax.plot(tau, d["mu_twin"], color=INK, lw=1.0, label="histogram simulator")
 ax.set_xlabel(r"$\tau$ (ns)")
@@ -70,13 +75,13 @@ ax.set_ylabel("mean counts/bin")
 # placement touched the dip's rising edge
 ax.text(0.04, 0.06, f"err {e1['summary']['rel_mean_err_pct']:.1f}%\n"
         f"Fano {e1['summary']['fano']:.2f}",
-        transform=ax.transAxes, ha="left", va="bottom", fontsize=5.8,
+        transform=ax.transAxes, ha="left", va="bottom", fontsize=8.5,
         color=INK2)
-ax.legend(loc="lower left", bbox_to_anchor=(-0.04, 1.02), ncol=1,
-          fontsize=5.8, frameon=False, handlelength=1.0, borderpad=0.1,
-          labelspacing=0.15)
+ax.legend(loc="lower left", bbox_to_anchor=(-0.02, 1.01), ncol=2,
+          fontsize=8.5, frameon=False, handlelength=1.2, borderpad=0.1,
+          columnspacing=1.0)
 despine(ax)
-panel_label(ax, "(d)", dx=-0.40, dy=1.22)
+panel_label(ax, "(d)", dx=-0.17, dy=1.16)
 
 # (e) real pulsed quantum-dot series (comb) + pulsed-twin model fit
 from sparq.physics import HBTConfig
@@ -106,20 +111,20 @@ popt, _ = curve_fit(
     p0=(6e3, 0.5, 1.5, 0.2, 0.2, 0.5, 0.0),
     bounds=([1e3, 0, 0.3, 0, 0, 0.25, -1], [3e4, 1.2, 5, 1, 1, 1.2, 1]),
     maxfev=6000)
-ax.plot(tau, hist, "o", ms=1.6, color=C["orange"], alpha=0.8,
+ax.plot(tau, hist, "o", ms=2.4, color=C["orange"], alpha=0.8,
         label="QD data (pulsed)")
 ax.plot(tau, model(tau, *popt), color=INK, lw=1.0, label="pulsed model fit")
 ax.set_xlabel(r"$\tau$ (ns)")
 ax.set_ylabel("counts/bin")
-ax.text(0.96, 0.855, rf"$g^{{(2)}}(0)={g2h:.2f}$",
-        transform=ax.transAxes, ha="right", fontsize=5.9, color=INK2,
+ax.text(0.5, 0.80, rf"$g^{{(2)}}(0)={g2h:.2f}$",
+        transform=ax.transAxes, ha="center", fontsize=8.5, color=INK2,
         bbox=dict(fc="white", ec="none", pad=0.3))
-ax.legend(loc="lower left", bbox_to_anchor=(-0.04, 1.02), ncol=1,
-          fontsize=5.8, frameon=False, handlelength=1.0, borderpad=0.1,
-          labelspacing=0.15)
+ax.legend(loc="lower left", bbox_to_anchor=(-0.02, 1.01), ncol=2,
+          fontsize=8.5, frameon=False, handlelength=1.2, borderpad=0.1,
+          columnspacing=1.0)
 despine(ax)
-panel_label(ax, "(e)", dx=-0.40, dy=1.22)
+panel_label(ax, "(e)", dx=-0.17, dy=1.16)
 
 fig.savefig(_ROOT + "/figures/fig2_validation.pdf")
-fig.savefig(_ROOT + "/figures/fig2_validation.png")
+fig.savefig(_ROOT + "/figures/fig2_validation.png", dpi=300)
 print("fig2 done, real-series g2(0) fit:", g2h)
