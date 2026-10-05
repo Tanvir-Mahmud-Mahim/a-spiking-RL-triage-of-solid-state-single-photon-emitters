@@ -163,6 +163,8 @@ doi:10.1088/2632-2153/ad0d11). They are not redistributed here.
   results are unchanged.
 * Figure 1 redrawn as a schematic of the measurement; new Figure S1; black
   tick labels in all figures.
+* Figures 2 to 5 enlarged (two-row layouts, larger text) at the editor's
+  request; Table of Contents graphic labels moved clear of the arrows.
 * Paths are relative to the repository, so the code runs from any folder.
 * Removed the unused `figures/fig0_abstract.py`.
 
