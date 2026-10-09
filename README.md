@@ -10,6 +10,9 @@ Archived data (result files and trained models): https://doi.org/10.5281/zenodo.
 (this DOI always points to the latest version; the version matching the
 second revision is https://doi.org/10.5281/zenodo.23045625)
 
+Supporting Information of the article (methods, validation, and all SI
+tables and figures): [`Supporting_Information.pdf`](Supporting_Information.pdf)
+
 ## What the code does
 
 Deciding whether a spot on a sample is a single-photon emitter needs a
@@ -167,6 +170,7 @@ doi:10.1088/2632-2153/ad0d11). They are not redistributed here.
   request; Table of Contents graphic labels moved clear of the arrows.
 * Paths are relative to the repository, so the code runs from any folder.
 * Removed the unused `figures/fig0_abstract.py`.
+* Added the Supporting Information of the article (`Supporting_Information.pdf`).
 
 ## License
 
